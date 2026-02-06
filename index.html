@@ -139,6 +139,96 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
+        /* 顶部APP打开提示栏 */
+        .app-bar {
+            position: fixed;
+            top: -100px;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: top 0.3s ease;
+        }
+        
+        .app-bar.show {
+            top: 0;
+        }
+        
+        .app-bar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .app-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quark-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .app-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .open-app-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .open-app-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .app-bar-content {
+                padding: 12px 15px;
+            }
+            
+            .quark-logo {
+                width: 28px;
+                height: 28px;
+                font-size: 16px;
+            }
+            
+            .app-name {
+                font-size: 14px;
+            }
+            
+            .open-app-btn {
+                padding: 6px 16px;
+                font-size: 13px;
+            }
+        }
+        
         /* 移动端优化 */
         @media (max-width: 768px) {
             html, body {
@@ -191,6 +281,17 @@
     </style>
 </head>
 <body>
+    <!-- 顶部APP打开提示栏 -->
+    <div class="app-bar" id="appBar">
+        <div class="app-bar-content">
+            <div class="app-info">
+                <div class="quark-logo">Q</div>
+                <span class="app-name">夸克网盘</span>
+            </div>
+            <button class="open-app-btn" onclick="openQuarkApp()">打开APP</button>
+        </div>
+    </div>
+    
     <div class="container">
         <h1>夸克网盘分享</h1>
         
@@ -222,11 +323,15 @@
             const content = "我用夸克网盘给你分享了「韭菜时钟」，点击链接或复制整段内容，打开「夸克APP」即可获取。\n\n/~ed8f3AJ8h5~:/\n\n链接： `https://pan.quark.cn/s/3efea11e9775`";
             const copyBtn = document.querySelector('.copy-btn');
             const successMessage = document.getElementById('successMessage');
+            const appBar = document.getElementById('appBar');
             
             navigator.clipboard.writeText(content)
                 .then(() => {
                     // 显示成功消息
                     successMessage.style.display = 'block';
+                    
+                    // 显示顶部APP打开提示栏
+                    appBar.classList.add('show');
                     
                     // 添加按钮动效
                     copyBtn.classList.add('copied');
@@ -252,6 +357,36 @@
                     console.error('复制失败:', err);
                     alert('复制失败，请手动复制内容');
                 });
+        }
+        
+        function openQuarkApp() {
+            // 尝试多种方式打开夸克APP
+            const quarkSchemes = [
+                'quark://',
+                'quarkbrowser://',
+                'qup://'
+            ];
+            
+            // 尝试通过scheme打开APP
+            for (const scheme of quarkSchemes) {
+                window.location.href = scheme;
+            }
+            
+            // 如果APP未打开，尝试跳转到应用商店
+            setTimeout(() => {
+                // 检测是否在移动设备上
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    // 跳转到应用商店
+                    if (navigator.userAgent.includes('iPhone')) {
+                        window.location.href = 'https://apps.apple.com/app/id1160172296'; // 夸克iOS
+                    } else {
+                        window.location.href = 'https://play.google.com/store/apps/details?id=com.quark.browser'; // 夸克Android
+                    }
+                } else {
+                    // 桌面端跳转到夸克网盘网页版
+                    window.location.href = 'https://pan.quark.cn/s/3efea11e9775#/list/share';
+                }
+            }, 1000);
         }
     </script>
 </body>
